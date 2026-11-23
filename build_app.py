@@ -6,8 +6,12 @@ import base64
 import json
 import os
 import re
+import sys
 
 WORK_DIR = r"C:\Users\ytouw\.gemini\antigravity\scratch\kateika-flashcards"
+if WORK_DIR not in sys.path:
+    sys.path.insert(0, WORK_DIR)
+from build_quicklook import build_quicklook_html, parse_marks_from_js
 CROP_DIR = r"C:\Users\ytouw\.gemini\antigravity\brain\0a7e6c3c-42b7-4101-a5c9-b19506fdd07e\scratch\extracted_hoken\crops"
 
 # 1. 美術（art_source.html）から148問を抽出
@@ -70,10 +74,36 @@ marks_and_diagram_js = m_marks.group(1).rsplit("// 全149問", 1)[0].strip()
 m_kcards = re.search(r"const CARDS = \[\s*([\s\S]*?)\n\];", k_html)
 assert m_kcards, "家庭科 CARDS 配列が見つかりません"
 kcards_js = m_kcards.group(1)
-# 各エントリ先頭の {id: に subj:"home", を挿入
+# 各エントリ先頭の {id: に subj:"home", を挿入し、Pythonオブジェクトとしてもパース
 kcards_js_with_subj = re.sub(r'(\{id:"[^"]+",)', r'\1subj:"home",', kcards_js)
 k_count = len(re.findall(r'\{id:"p\d+-\d+"', kcards_js_with_subj))
 assert k_count == 149, f"家庭科カード数が149ではありません: {k_count}"
+
+# JSオブジェクトリテラルからコメント除去＋キー引用符付与でJSONパース
+_home_clean = re.sub(r'^\s*//.*$', '', kcards_js_with_subj, flags=re.M)
+_home_clean = re.sub(r'([{,\s])([a-zA-Z_][a-zA-Z0-9_]*)\s*:', r'\1"\2":', _home_clean)
+home_cards = json.loads("[" + _home_clean + "]")
+home_cards.extend([
+    {
+        "id": "p7-all-rights", "subj": "home", "cat": "rights", "unit": "8つの権利", "note": "ノート7 まとめ",
+        "type": "list", "a": "消費者の8つの権利",
+        "q": "国際消費者機構が挙げた【消費者の8つの権利】をすべて答えなさい。",
+        "items": [
+            "安全を求める権利", "意見が反映される権利", "選択する権利", "知らされる権利",
+            "補償を受ける権利", "消費者教育を受ける権利", "生活の基本的ニーズが保障される権利", "健全な環境を享受する権利"
+        ],
+    },
+    {
+        "id": "p7-all-resp", "subj": "home", "cat": "rights", "unit": "5つの責任", "note": "ノート7 まとめ",
+        "type": "list", "a": "消費者の5つの責任",
+        "q": "国際消費者機構が挙げた【消費者の5つの責任】をすべて答えなさい。",
+        "items": [
+            "批判的意識を持つ責任", "主張し、行動する責任", "連帯する責任",
+            "環境への配慮をする責任", "社会的弱者に配慮する責任"
+        ],
+    },
+])
+assert len(home_cards) == 151, f"家庭科合計数が151ではありません: {len(home_cards)}"
 
 # 3. 体育・音楽・保健・社会のJSONを読み込み
 with open(os.path.join(WORK_DIR, "data_pe.json"), encoding="utf-8") as f:
@@ -233,9 +263,12 @@ label.chk{display:inline-flex;align-items:center;gap:4px;font-size:.82rem;margin
 #sync-msg{font-size:.84rem;font-weight:700;min-height:1.3em;margin-bottom:8px}
 #cam-box{margin-top:8px;text-align:center}
 #cam-video{width:100%;max-height:240px;border-radius:10px;background:#000;object-fit:cover}
+__QUICKLOOK_CSS__
 </style>
 </head>
 <body>
+__QUICKLOOK_HTML__
+<div id="js-app">
 <div class="wrap">
 <h1>テスト対策フラッシュカード__VERSION_BADGE__</h1>
 <div class="hash-banner" id="hash-banner" style="display:none">
@@ -370,7 +403,9 @@ label.chk{display:inline-flex;align-items:center;gap:4px;font-size:.82rem;margin
   </div>
  </div>
 </div>
+</div>
 <script>
+document.documentElement.classList.add("has-js");
 const IS_OFFLINE_BUILD = __IS_OFFLINE__;
 // 教科メタ情報（表示名・五十音ソート順・単元フィルター定義）
 const SUBJ_META = {
@@ -389,17 +424,18 @@ const MUSIC_IMGS = __MUSIC_IMGS__;
 
 const ART_CARDS = __ART_CARDS__;
 
-const HOME_CARDS = [
-__HOME_CARDS__,
-  {id:"p7-all-rights",subj:"home",cat:"rights",unit:"8つの権利",note:"ノート7 まとめ",type:"list",
-   a:"消費者の8つの権利",
-   q:"国際消費者機構が挙げた【消費者の8つの権利】をすべて答えなさい。",
-   items:["安全を求める権利","意見が反映される権利","選択する権利","知らされる権利","補償を受ける権利","消費者教育を受ける権利","生活の基本的ニーズが保障される権利","健全な環境を享受する権利"]},
-  {id:"p7-all-resp",subj:"home",cat:"rights",unit:"5つの責任",note:"ノート7 まとめ",type:"list",
-   a:"消費者の5つの責任",
-   q:"国際消費者機構が挙げた【消費者の5つの責任】をすべて答えなさい。",
-   items:["批判的意識を持つ責任","主張し、行動する責任","連帯する責任","環境への配慮をする責任","社会的弱者に配慮する責任"]}
-];
+// オフライン版ではDOM内のクイックルック用画像データURIを共有してファイル肥大化を防ぐ
+if (IS_OFFLINE_BUILD) {
+  const domImgs = {};
+  document.querySelectorAll("#ql-app img[data-imgkey]").forEach(el => {
+    const k = el.getAttribute("data-imgkey");
+    if (k && !domImgs[k]) domImgs[k] = el.getAttribute("src");
+  });
+  ART_CARDS.forEach(c => { if (c.imgKey && domImgs[c.imgKey]) c.img = domImgs[c.imgKey]; });
+  Object.assign(MUSIC_IMGS, domImgs);
+}
+
+const HOME_CARDS = __HOME_CARDS__;
 
 const PE_CARDS = __PE_CARDS__;
 const MUSIC_CARDS = __MUSIC_CARDS__;
@@ -695,21 +731,70 @@ __QR_MODAL_UI_JS__
 </html>
 """
 
+marks_map = parse_marks_from_js(marks_and_diagram_js)
+assert len(marks_map) == 15, f"SVGマーク数が15ではありません: {len(marks_map)}"
+
+QUICKLOOK_CSS = """
+#js-app{display:none}
+.has-js #js-app{display:block}
+.has-js #ql-app{display:none}
+.ql-note{font-size:.82rem;color:var(--sub);margin:0 0 12px}
+.ql-subj{background:var(--card);border:1px solid var(--line);border-radius:14px;margin-bottom:10px;overflow:hidden}
+.ql-subj summary::-webkit-details-marker,.ql-card summary::-webkit-details-marker{display:none}
+.ql-subj-hd{list-style:none;display:flex;align-items:center;gap:8px;padding:12px 14px;font-weight:800;font-size:.96rem;cursor:pointer}
+.ql-arr{margin-left:auto;font-size:.78rem;color:var(--sub);transition:transform .2s}
+.ql-subj[open]>.ql-subj-hd .ql-arr{transform:rotate(180deg)}
+.ql-list{padding:0 10px 10px;display:flex;flex-direction:column;gap:8px}
+.ql-card{background:var(--bg);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.ql-card>summary{list-style:none;padding:12px 14px;cursor:pointer;text-align:center}
+.ql-meta{display:flex;justify-content:space-between;font-size:.74rem;color:var(--sub);margin-bottom:8px;gap:6px;text-align:left}
+.ql-imgwrap{display:flex;justify-content:center;align-items:center;margin:4px 0 6px}
+.ql-imgwrap img{max-width:100%;max-height:260px;object-fit:contain;border-radius:8px;background:#fff}
+.ql-imgwrap.ql-fig img{max-height:170px;border:1px solid var(--line);padding:3px}
+.ql-center{margin:6px auto}
+.ql-tap{font-size:.74rem;color:var(--sub);margin-top:8px}
+.ql-card[open]>summary .ql-tap{display:none}
+.ql-ans{background:var(--card);border-top:1px dashed var(--line);padding:14px;text-align:center}
+"""
+
+ql_html, art_img_key_map = build_quicklook_html(
+    [
+        ("art", "美術", art_cards),
+        ("home", "家庭科", home_cards),
+        ("pe", "体育", pe_cards),
+        ("music", "音楽", music_cards),
+        ("health", "保健", health_cards),
+        ("social", "社会", social_cards),
+    ],
+    marks_map,
+    music_imgs,
+)
+
+# オフライン版JS用の軽量ART_CARDS（Base64画像はDOMの#ql-appから自動共有）
+art_cards_slim = []
+for c in art_cards:
+    if c["type"] == "art-work":
+        c2 = {k: v for k, v in c.items() if k != "img"}
+        c2["imgKey"] = art_img_key_map[c["id"]]
+        art_cards_slim.append(c2)
+    else:
+        art_cards_slim.append(c)
+
+
 def render_variant(is_offline: bool) -> str:
-    csp = (
-        '<meta http-equiv="Content-Security-Policy" content="default-src \'none\'; style-src \'unsafe-inline\'; script-src \'unsafe-inline\'; img-src data: blob:; media-src mediastream:;">'
-        if is_offline else ""
-    )
+    # iOSクイックルックでの data: 画像 / インラインSVG互換性のため厳格CSPは付けず、
+    # コード自体から外部URL・外部ライブラリを完全に排除してゼロ外部依存を保証する
+    csp = ""
     title = (
-        "6教科テスト対策フラッシュカード【完全オフライン版】｜外部ライブラリなし（全677問）"
+        "6教科テスト対策フラッシュカード【完全オフライン / クイックルック対応】｜全677問"
         if is_offline else
         "6教科テスト対策フラッシュカード｜美術・家庭科・体育・音楽・保健・社会（全677問）"
     )
     badge = '<span class="ver-badge">完全オフライン版</span>' if is_offline else ""
     links = (
-        '<span>外部ライブラリ・外部通信なし（1ファイル完結）｜通常版ともQR・コード・JSONでデータ互換</span>'
+        '<span>外部ライブラリ・外部通信なし（iOSクイックルック＆ブラウザ両対応）｜通常版ともQR・コード・JSONでデータ互換</span>'
         if is_offline else
-        '<span>版切替：</span><a href="./offline.html">完全オフライン版（外部ライブラリなし）を開く</a>'
+        '<span>版切替：</span><a href="./offline.html">完全オフライン版（iOSクイックルック対応）を開く</a>'
         '<a href="./offline.html" download="study-flashcards-offline.html">オフライン版を保存（1ファイル）</a>'
         '<a href="./offline_download_qr.png" target="_blank">オフライン版DL用QR</a>'
     )
@@ -720,10 +805,12 @@ def render_variant(is_offline: bool) -> str:
         .replace("__VERSION_BADGE__", badge)
         .replace("__VERSION_LINKS__", links)
         .replace("__IS_OFFLINE__", "true" if is_offline else "false")
+        .replace("__QUICKLOOK_CSS__", QUICKLOOK_CSS if is_offline else "")
+        .replace("__QUICKLOOK_HTML__", ql_html if is_offline else "")
         .replace("__MARKS_AND_DIAGRAM__", marks_and_diagram_js)
-        .replace("__MUSIC_IMGS__", json.dumps(music_imgs, ensure_ascii=False))
-        .replace("__ART_CARDS__", json.dumps(art_cards, ensure_ascii=False))
-        .replace("__HOME_CARDS__", kcards_js_with_subj)
+        .replace("__MUSIC_IMGS__", "{}" if is_offline else json.dumps(music_imgs, ensure_ascii=False))
+        .replace("__ART_CARDS__", json.dumps(art_cards_slim if is_offline else art_cards, ensure_ascii=False))
+        .replace("__HOME_CARDS__", json.dumps(home_cards, ensure_ascii=False))
         .replace("__PE_CARDS__", json.dumps(pe_cards, ensure_ascii=False))
         .replace("__MUSIC_CARDS__", json.dumps(music_cards, ensure_ascii=False))
         .replace("__HEALTH_CARDS__", json.dumps(health_cards, ensure_ascii=False))

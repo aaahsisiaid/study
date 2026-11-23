@@ -145,6 +145,7 @@ html_template = r"""<!doctype html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 __OFFLINE_CSP__
+__PWA_HEAD__
 <title>__PAGE_TITLE__</title>
 <meta name="description" content="中学・高校の期末テスト対策に使える無料の暗記フラッシュカード。美術（148問）・家庭科（消費者・クレカ・マーク・8つの権利と5つの責任など151問）・体育（80問）・音楽（世界の民族楽器写真24種・帰れソレントへ65問）・保健（感染症・エイズ・医薬品109問）・社会（歴史：明治維新〜第一次世界大戦と民族独立の動き124問）の全677問を収録。">
 <meta name="keywords" content="テスト対策,期末テスト,フラッシュカード,暗記カード,中学歴史,社会,明治維新,自由民権運動,大日本帝国憲法,日清戦争,日露戦争,第一次世界大戦,美術,家庭科,消費者の8つの権利,消費者の5つの責任,体育,音楽,世界の民族楽器,保健,感染症,無料">
@@ -310,6 +311,7 @@ __QUICKLOOK_HTML__
 <div class="nav"><button id="prev">← 前</button><button class="ng" id="no">まだ</button><button class="ok" id="yes">覚えた</button><button id="nxt">次 →</button></div>
 <p style="color:var(--sub);font-size:.8rem;margin-top:10px">カードをタップでめくる。キーボードは ←→ で移動、スペースでめくる、↑で覚えた、↓でまだ。</p>
 <div class="ver-links">__VERSION_LINKS__</div>
+<div id="pwa-status" style="font-size:.76rem;color:var(--ok);margin-top:4px;min-height:1.1em"></div>
 <details class="seo-info">
   <summary>収録教科・テスト対策範囲一覧（全677問）</summary>
   <h2>美術（148問）</h2>
@@ -726,6 +728,25 @@ apply(false);
 __QR_SYNC_JS__
 
 __QR_MODAL_UI_JS__
+
+// PWAオフラインキャッシュ登録（通常版・HTTPS環境のみ）
+if (!IS_OFFLINE_BUILD && "serviceWorker" in navigator && location.protocol.startsWith("http")) {
+  navigator.serviceWorker.register("./sw.js").then(reg => {
+    const showReady = () => {
+      const el = $("#pwa-status");
+      if (el) el.textContent = "✓ オフラインキャッシュ完了（Safari「共有 ＞ ホーム画面に追加」で機内モードでも全画像・全機能が動作します）";
+    };
+    if (reg.active) showReady();
+    reg.addEventListener("updatefound", () => {
+      const nw = reg.installing;
+      if (nw) nw.addEventListener("statechange", () => { if (nw.state === "activated") showReady(); });
+    });
+    navigator.serviceWorker.ready.then(showReady);
+  }).catch(() => {});
+  if (navigator.storage && navigator.storage.persist) {
+    navigator.storage.persist().catch(() => {});
+  }
+}
 </script>
 </body>
 </html>
@@ -785,22 +806,32 @@ def render_variant(is_offline: bool) -> str:
     # iOSクイックルックでの data: 画像 / インラインSVG互換性のため厳格CSPは付けず、
     # コード自体から外部URL・外部ライブラリを完全に排除してゼロ外部依存を保証する
     csp = ""
+    pwa_head = "" if is_offline else (
+        '<link rel="manifest" href="./manifest.json">\n'
+        '<meta name="theme-color" content="#7b4fb0">\n'
+        '<meta name="apple-mobile-web-app-capable" content="yes">\n'
+        '<meta name="apple-mobile-web-app-status-bar-style" content="default">\n'
+        '<meta name="apple-mobile-web-app-title" content="テスト暗記">\n'
+        '<link rel="apple-touch-icon" href="./icon-192.png">'
+    )
     title = (
-        "6教科テスト対策フラッシュカード【完全オフライン / クイックルック対応】｜全677問"
+        "6教科テスト対策フラッシュカード【完全オフライン版】｜全677問"
         if is_offline else
         "6教科テスト対策フラッシュカード｜美術・家庭科・体育・音楽・保健・社会（全677問）"
     )
     badge = '<span class="ver-badge">完全オフライン版</span>' if is_offline else ""
     links = (
-        '<span>外部ライブラリ・外部通信なし（iOSクイックルック＆ブラウザ両対応）｜通常版ともQR・コード・JSONでデータ互換</span>'
+        '<span>外部ライブラリ・外部通信なし（1ファイル完結）｜通常版ともQR・コード・JSONでデータ互換</span>'
         if is_offline else
-        '<span>版切替：</span><a href="./offline.html">完全オフライン版（iOSクイックルック対応）を開く</a>'
-        '<a href="./offline.html" download="study-flashcards-offline.html">オフライン版を保存（1ファイル）</a>'
-        '<a href="./offline_download_qr.png" target="_blank">オフライン版DL用QR</a>'
+        '<span>オフライン用：</span>'
+        '<a href="./study_quicklook.pdf" download="study_quicklook.pdf">iOSクイックルック用PDF（全画像対応）</a>'
+        '<a href="./offline.html" download="study-flashcards-offline.html">HTML単体版を保存</a>'
+        '<a href="./offline_pdf_qr.png" target="_blank">PDF用QR</a>'
     )
     return (
         html_template
         .replace("__OFFLINE_CSP__", csp)
+        .replace("__PWA_HEAD__", pwa_head)
         .replace("__PAGE_TITLE__", title)
         .replace("__VERSION_BADGE__", badge)
         .replace("__VERSION_LINKS__", links)

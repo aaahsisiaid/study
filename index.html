@@ -4,6 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#7b4fb0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="テスト暗記">
+<link rel="apple-touch-icon" href="./icon-192.png">
 <title>6教科テスト対策フラッシュカード｜美術・家庭科・体育・音楽・保健・社会（全677問）</title>
 <meta name="description" content="中学・高校の期末テスト対策に使える無料の暗記フラッシュカード。美術（148問）・家庭科（消費者・クレカ・マーク・8つの権利と5つの責任など151問）・体育（80問）・音楽（世界の民族楽器写真24種・帰れソレントへ65問）・保健（感染症・エイズ・医薬品109問）・社会（歴史：明治維新〜第一次世界大戦と民族独立の動き124問）の全677問を収録。">
 <meta name="keywords" content="テスト対策,期末テスト,フラッシュカード,暗記カード,中学歴史,社会,明治維新,自由民権運動,大日本帝国憲法,日清戦争,日露戦争,第一次世界大戦,美術,家庭科,消費者の8つの権利,消費者の5つの責任,体育,音楽,世界の民族楽器,保健,感染症,無料">
@@ -168,7 +174,8 @@ label.chk{display:inline-flex;align-items:center;gap:4px;font-size:.82rem;margin
 <div id="area"></div>
 <div class="nav"><button id="prev">← 前</button><button class="ng" id="no">まだ</button><button class="ok" id="yes">覚えた</button><button id="nxt">次 →</button></div>
 <p style="color:var(--sub);font-size:.8rem;margin-top:10px">カードをタップでめくる。キーボードは ←→ で移動、スペースでめくる、↑で覚えた、↓でまだ。</p>
-<div class="ver-links"><span>版切替：</span><a href="./offline.html">完全オフライン版（iOSクイックルック対応）を開く</a><a href="./offline.html" download="study-flashcards-offline.html">オフライン版を保存（1ファイル）</a><a href="./offline_download_qr.png" target="_blank">オフライン版DL用QR</a></div>
+<div class="ver-links"><span>オフライン用：</span><a href="./study_quicklook.pdf" download="study_quicklook.pdf">iOSクイックルック用PDF（全画像対応）</a><a href="./offline.html" download="study-flashcards-offline.html">HTML単体版を保存</a><a href="./offline_pdf_qr.png" target="_blank">PDF用QR</a></div>
+<div id="pwa-status" style="font-size:.76rem;color:var(--ok);margin-top:4px;min-height:1.1em"></div>
 <details class="seo-info">
   <summary>収録教科・テスト対策範囲一覧（全677問）</summary>
   <h2>美術（148問）</h2>
@@ -1426,6 +1433,25 @@ function applyImportedIds(ids, mode) {
   window.addEventListener("hashchange", checkHashSync);
 })();
 
+
+// PWAオフラインキャッシュ登録（通常版・HTTPS環境のみ）
+if (!IS_OFFLINE_BUILD && "serviceWorker" in navigator && location.protocol.startsWith("http")) {
+  navigator.serviceWorker.register("./sw.js").then(reg => {
+    const showReady = () => {
+      const el = $("#pwa-status");
+      if (el) el.textContent = "✓ オフラインキャッシュ完了（Safari「共有 ＞ ホーム画面に追加」で機内モードでも全画像・全機能が動作します）";
+    };
+    if (reg.active) showReady();
+    reg.addEventListener("updatefound", () => {
+      const nw = reg.installing;
+      if (nw) nw.addEventListener("statechange", () => { if (nw.state === "activated") showReady(); });
+    });
+    navigator.serviceWorker.ready.then(showReady);
+  }).catch(() => {});
+  if (navigator.storage && navigator.storage.persist) {
+    navigator.storage.persist().catch(() => {});
+  }
+}
 </script>
 </body>
 </html>

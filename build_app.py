@@ -84,6 +84,10 @@ with open(os.path.join(WORK_DIR, "data_health.json"), encoding="utf-8") as f:
     health_cards = json.load(f)
 with open(os.path.join(WORK_DIR, "data_social.json"), encoding="utf-8") as f:
     social_cards = json.load(f)
+with open(os.path.join(WORK_DIR, "qr_sync.js"), encoding="utf-8") as f:
+    qr_sync_js = f.read()
+with open(os.path.join(WORK_DIR, "qr_modal_ui.js"), encoding="utf-8") as f:
+    qr_modal_ui_js = f.read()
 
 # 4. 音楽の画像28枚（楽器24種は鮮明な実物カラー写真、図1〜3と楽譜は切り抜き）をBase64データURI化
 PHOTO_DIR = os.path.join(WORK_DIR, "music_photos")
@@ -110,7 +114,8 @@ html_template = r"""<!doctype html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>6教科テスト対策フラッシュカード｜美術・家庭科・体育・音楽・保健・社会（全677問）</title>
+__OFFLINE_CSP__
+<title>__PAGE_TITLE__</title>
 <meta name="description" content="中学・高校の期末テスト対策に使える無料の暗記フラッシュカード。美術（148問）・家庭科（消費者・クレカ・マーク・8つの権利と5つの責任など151問）・体育（80問）・音楽（世界の民族楽器写真24種・帰れソレントへ65問）・保健（感染症・エイズ・医薬品109問）・社会（歴史：明治維新〜第一次世界大戦と民族独立の動き124問）の全677問を収録。">
 <meta name="keywords" content="テスト対策,期末テスト,フラッシュカード,暗記カード,中学歴史,社会,明治維新,自由民権運動,大日本帝国憲法,日清戦争,日露戦争,第一次世界大戦,美術,家庭科,消費者の8つの権利,消費者の5つの責任,体育,音楽,世界の民族楽器,保健,感染症,無料">
 <meta name="robots" content="index,follow">
@@ -198,11 +203,49 @@ label.chk{display:inline-flex;align-items:center;gap:4px;font-size:.82rem;margin
 .seo-info summary{cursor:pointer;font-weight:700}
 .seo-info h2{font-size:.88rem;margin:10px 0 4px;color:var(--fg)}
 .seo-info p{margin:4px 0}
+.ver-badge{display:inline-block;font-size:.72rem;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--ok);color:#fff;margin-left:8px;vertical-align:middle}
+.ver-links{margin-top:10px;font-size:.8rem;color:var(--sub);display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.ver-links a{color:var(--acc);text-decoration:none;font-weight:700}
+.ver-links a:hover{text-decoration:underline}
+.hash-banner{background:var(--card);border:2px solid var(--acc);border-radius:12px;padding:12px 14px;margin-bottom:12px;font-size:.88rem}
+.hash-banner .hb-btns{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.hash-banner button{font:inherit;font-size:.82rem;font-weight:700;border:1px solid var(--line);background:var(--card);color:var(--fg);border-radius:8px;padding:5px 12px;cursor:pointer}
+.hash-banner .btn-p{background:var(--acc);color:#fff;border-color:var(--acc)}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;padding:14px;z-index:99}
+.modal.open{display:flex}
+.modal-box{background:var(--card);color:var(--fg);border:1px solid var(--line);border-radius:16px;max-width:480px;width:100%;max-height:90vh;overflow-y:auto;padding:18px}
+.modal-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.modal-hd h2{font-size:1.05rem;margin:0}
+.modal-hd button{font:inherit;border:1px solid var(--line);background:transparent;color:var(--fg);border-radius:8px;padding:2px 10px;cursor:pointer}
+.sync-tabs{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px}
+.sync-tabs button{font:inherit;font-size:.88rem;font-weight:700;border:1px solid var(--line);background:var(--bg);color:var(--fg);border-radius:10px;padding:8px 0;cursor:pointer}
+.sync-tabs button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+.qr-wrap{width:220px;max-width:70vw;margin:10px auto;background:#fff;padding:8px;border-radius:10px;border:1px solid var(--line)}
+.qr-wrap svg{width:100%;height:auto;display:block}
+.sync-sec{margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--line)}
+.sync-sec:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
+.sync-sec h3{font-size:.86rem;margin:0 0 6px;color:var(--sub)}
+.sync-box textarea{width:100%;font-family:ui-monospace,Consolas,monospace;font-size:.78rem;padding:8px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--fg);resize:vertical}
+.sync-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.sync-row button,.file-btn{font:inherit;font-size:.82rem;font-weight:700;border:1px solid var(--line);background:var(--bg);color:var(--fg);border-radius:8px;padding:6px 11px;cursor:pointer;display:inline-flex;align-items:center;gap:4px}
+.sync-row button.on,.sync-row button.prim{background:var(--acc);color:#fff;border-color:var(--acc)}
+.file-btn input{display:none}
+#sync-msg{font-size:.84rem;font-weight:700;min-height:1.3em;margin-bottom:8px}
+#cam-box{margin-top:8px;text-align:center}
+#cam-video{width:100%;max-height:240px;border-radius:10px;background:#000;object-fit:cover}
 </style>
 </head>
 <body>
 <div class="wrap">
-<h1>テスト対策フラッシュカード</h1>
+<h1>テスト対策フラッシュカード__VERSION_BADGE__</h1>
+<div class="hash-banner" id="hash-banner" style="display:none">
+ <div id="hash-banner-txt" style="font-weight:700"></div>
+ <div class="hb-btns">
+  <button class="btn-p" id="hash-merge">今の記録に追加（マージ）</button>
+  <button id="hash-replace">今の記録を上書き</button>
+  <button id="hash-cancel">キャンセル</button>
+ </div>
+</div>
 <div class="ctl subj-bar" id="subj"></div>
 <div class="ctl" id="filt"></div>
 <div class="ctl">
@@ -217,6 +260,7 @@ label.chk{display:inline-flex;align-items:center;gap:4px;font-size:.82rem;margin
   <option value="name">表：名称 → 裏：絵・マーク・楽器</option>
  </select>
  <button id="shuf">シャッフル</button>
+ <button id="sync-open">データ入出力 / QR</button>
  <button id="reset">覚えた印を消す</button>
 </div>
 <div class="ctl" id="show">
@@ -232,6 +276,7 @@ label.chk{display:inline-flex;align-items:center;gap:4px;font-size:.82rem;margin
 <div id="area"></div>
 <div class="nav"><button id="prev">← 前</button><button class="ng" id="no">まだ</button><button class="ok" id="yes">覚えた</button><button id="nxt">次 →</button></div>
 <p style="color:var(--sub);font-size:.8rem;margin-top:10px">カードをタップでめくる。キーボードは ←→ で移動、スペースでめくる、↑で覚えた、↓でまだ。</p>
+<div class="ver-links">__VERSION_LINKS__</div>
 <details class="seo-info">
   <summary>収録教科・テスト対策範囲一覧（全677問）</summary>
   <h2>美術（148問）</h2>
@@ -248,7 +293,85 @@ label.chk{display:inline-flex;align-items:center;gap:4px;font-size:.82rem;margin
   <p>明治維新と近代国家の出発（五箇条の御誓文・戊辰戦争・廃藩置県・三大改革・文明開化）、領土の確定と近隣諸国との外交（岩倉使節団・北海道開拓・琉球処分・樺太千島交換条約・日清／日朝修好条規）、自由民権運動と大日本帝国憲法、欧米の帝国主義と条約改正・日清戦争・日露戦争・韓国併合・辛亥革命、日本の産業革命と明治の文化、第一次世界大戦とロシア革命・国際連盟・ワシントン会議・アジアの民族独立運動（三・一独立運動・五・四運動・ガンディー）。</p>
 </details>
 </div>
+
+<!-- データ同期・バックアップモーダル（QR・同期コード・JSON） -->
+<div class="modal" id="sync-modal" role="dialog" aria-modal="true" aria-label="データ入出力とQR同期">
+ <div class="modal-box sync-box">
+  <div class="modal-hd">
+   <h2>データ入出力 / QR同期</h2>
+   <button id="sync-close" aria-label="閉じる">✕ 閉じる</button>
+  </div>
+  <div id="sync-summary" style="font-size:.84rem;color:var(--sub);margin-bottom:8px"></div>
+  <div class="sync-tabs">
+   <button data-tab="export" class="on">エクスポート（書き出し）</button>
+   <button data-tab="import">インポート（読み込み）</button>
+  </div>
+  <div id="sync-msg"></div>
+
+  <div id="pane-export">
+   <div class="sync-sec">
+    <h3>1. QRコードで別端末へ転送（外部ライブラリ不要で生成）</h3>
+    <div class="sync-row" style="justify-content:center">
+     <button id="qr-mode-url">URL形式QR</button>
+     <button id="qr-mode-code">コードのみQR</button>
+    </div>
+    <div class="qr-wrap" id="qr-wrap"></div>
+    <p id="qr-hint" style="font-size:.76rem;color:var(--sub);margin:4px 0 8px;text-align:center"></p>
+    <div class="sync-row" style="justify-content:center">
+     <button class="prim" id="btn-save-qr">QR画像を保存（PNG）</button>
+    </div>
+   </div>
+   <div class="sync-sec">
+    <h3>2. 同期コード（約121文字）をコピー</h3>
+    <textarea id="sync-code-out" rows="3" readonly></textarea>
+    <div class="sync-row">
+     <button class="prim" id="btn-copy-code">同期コードをコピー</button>
+     <button id="btn-copy-url">同期リンクをコピー</button>
+    </div>
+   </div>
+   <div class="sync-sec">
+    <h3>3. JSONファイルでバックアップ</h3>
+    <div class="sync-row">
+     <button id="btn-dl-json">JSONファイルをダウンロード</button>
+    </div>
+   </div>
+  </div>
+
+  <div id="pane-import" style="display:none">
+   <div class="sync-sec">
+    <h3>取り込み方法</h3>
+    <label class="chk"><input type="radio" name="imp-mode" value="merge" checked>今の記録に追加（マージ）</label>
+    <label class="chk"><input type="radio" name="imp-mode" value="replace">今の記録を上書き</label>
+   </div>
+   <div class="sync-sec">
+    <h3>1. QRコードから読み込む</h3>
+    <div class="sync-row">
+     <button class="prim" id="btn-cam-scan">カメラでQRスキャン</button>
+     <label class="file-btn">QR画像から読取<input type="file" id="file-imp-qr" accept="image/*"></label>
+    </div>
+    <div id="cam-box" style="display:none">
+     <video id="cam-video" playsinline muted></video>
+     <div class="sync-row" style="justify-content:center"><button id="btn-cam-stop">カメラを停止</button></div>
+    </div>
+   </div>
+   <div class="sync-sec">
+    <h3>2. 同期コードまたは同期URLを貼り付け</h3>
+    <textarea id="sync-code-in" rows="3" placeholder="S1_... または https://.../#sync=S1_... を貼り付け"></textarea>
+    <div class="sync-row">
+     <button class="prim" id="btn-imp-code">コードから取り込む</button>
+    </div>
+   </div>
+   <div class="sync-sec">
+    <h3>3. JSONバックアップファイルから読み込む</h3>
+    <div class="sync-row">
+     <label class="file-btn">JSONファイルを選択<input type="file" id="file-imp-json" accept=".json,application/json"></label>
+    </div>
+   </div>
+  </div>
+ </div>
+</div>
 <script>
+const IS_OFFLINE_BUILD = __IS_OFFLINE__;
 // 教科メタ情報（表示名・五十音ソート順・単元フィルター定義）
 const SUBJ_META = {
   all:    { label: "全教科", order: 0, filters: [["all","ぜんぶ"],["visual","絵・写真・マーク"],["cloze","穴埋め"],["todo","まだのカードだけ"]] },
@@ -547,7 +670,12 @@ $("#yes").onclick = () => mark(1);
 $("#no").onclick = () => mark(0);
 
 document.addEventListener("keydown", e => {
-  if (e.target.tagName === "SELECT" || e.target.tagName === "INPUT") return;
+  const modal = $("#sync-modal");
+  if (modal && modal.classList.contains("open")) {
+    if (e.key === "Escape") $("#sync-close").click();
+    return;
+  }
+  if (e.target.tagName === "SELECT" || e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
   if (e.key === "ArrowRight") { e.preventDefault(); go(1); }
   else if (e.key === "ArrowLeft") { e.preventDefault(); go(-1); }
   else if (e.key === " " || e.code === "Space") { e.preventDefault(); flip(); }
@@ -558,24 +686,66 @@ document.addEventListener("keydown", e => {
 buildSubjBar();
 buildFiltBar();
 apply(false);
+
+__QR_SYNC_JS__
+
+__QR_MODAL_UI_JS__
 </script>
 </body>
 </html>
 """
 
-out_html = (
-    html_template
-    .replace("__MARKS_AND_DIAGRAM__", marks_and_diagram_js)
-    .replace("__MUSIC_IMGS__", json.dumps(music_imgs, ensure_ascii=False))
-    .replace("__ART_CARDS__", json.dumps(art_cards, ensure_ascii=False))
-    .replace("__HOME_CARDS__", kcards_js_with_subj)
-    .replace("__PE_CARDS__", json.dumps(pe_cards, ensure_ascii=False))
-    .replace("__MUSIC_CARDS__", json.dumps(music_cards, ensure_ascii=False))
-    .replace("__HEALTH_CARDS__", json.dumps(health_cards, ensure_ascii=False))
-    .replace("__SOCIAL_CARDS__", json.dumps(social_cards, ensure_ascii=False))
-)
+def render_variant(is_offline: bool) -> str:
+    csp = (
+        '<meta http-equiv="Content-Security-Policy" content="default-src \'none\'; style-src \'unsafe-inline\'; script-src \'unsafe-inline\'; img-src data: blob:; media-src mediastream:;">'
+        if is_offline else ""
+    )
+    title = (
+        "6教科テスト対策フラッシュカード【完全オフライン版】｜外部ライブラリなし（全677問）"
+        if is_offline else
+        "6教科テスト対策フラッシュカード｜美術・家庭科・体育・音楽・保健・社会（全677問）"
+    )
+    badge = '<span class="ver-badge">完全オフライン版</span>' if is_offline else ""
+    links = (
+        '<span>外部ライブラリ・外部通信なし（1ファイル完結）｜通常版ともQR・コード・JSONでデータ互換</span>'
+        if is_offline else
+        '<span>版切替：</span><a href="./offline.html">完全オフライン版（外部ライブラリなし）を開く</a>'
+        '<a href="./offline.html" download="study-flashcards-offline.html">オフライン版を保存（1ファイル）</a>'
+    )
+    return (
+        html_template
+        .replace("__OFFLINE_CSP__", csp)
+        .replace("__PAGE_TITLE__", title)
+        .replace("__VERSION_BADGE__", badge)
+        .replace("__VERSION_LINKS__", links)
+        .replace("__IS_OFFLINE__", "true" if is_offline else "false")
+        .replace("__MARKS_AND_DIAGRAM__", marks_and_diagram_js)
+        .replace("__MUSIC_IMGS__", json.dumps(music_imgs, ensure_ascii=False))
+        .replace("__ART_CARDS__", json.dumps(art_cards, ensure_ascii=False))
+        .replace("__HOME_CARDS__", kcards_js_with_subj)
+        .replace("__PE_CARDS__", json.dumps(pe_cards, ensure_ascii=False))
+        .replace("__MUSIC_CARDS__", json.dumps(music_cards, ensure_ascii=False))
+        .replace("__HEALTH_CARDS__", json.dumps(health_cards, ensure_ascii=False))
+        .replace("__SOCIAL_CARDS__", json.dumps(social_cards, ensure_ascii=False))
+        .replace("__QR_SYNC_JS__", qr_sync_js)
+        .replace("__QR_MODAL_UI_JS__", qr_modal_ui_js)
+    )
 
+# 1. 通常版（index.html）
+out_online = render_variant(False)
 out_path = os.path.join(WORK_DIR, "index.html")
 with open(out_path, "w", encoding="utf-8") as f:
-    f.write(out_html)
-print(f"BUILT: {out_path} ({len(out_html):,} bytes)")
+    f.write(out_online)
+print(f"BUILT ONLINE : {out_path} ({len(out_online):,} bytes)")
+
+# 2. 完全オフライン・外部ライブラリなし版（offline.html）
+# オフライン版では外部CDNのURL文字列自体も完全に除去してゼロ外部依存を保証
+out_offline = render_variant(True)
+assert "cdn.jsdelivr.net" not in out_offline or "if (IS_OFFLINE_BUILD) return Promise.resolve(null);" in out_offline
+# さらにクリーンにするため、offline.htmlからCDNスクリプトローダーのURL文字列も完全に除去
+out_offline = out_offline.replace("https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js", "")
+assert "cdn.jsdelivr.net" not in out_offline
+offline_path = os.path.join(WORK_DIR, "offline.html")
+with open(offline_path, "w", encoding="utf-8") as f:
+    f.write(out_offline)
+print(f"BUILT OFFLINE: {offline_path} ({len(out_offline):,} bytes)")

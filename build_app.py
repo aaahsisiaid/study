@@ -711,6 +711,7 @@ def render_variant(is_offline: bool) -> str:
         if is_offline else
         '<span>版切替：</span><a href="./offline.html">完全オフライン版（外部ライブラリなし）を開く</a>'
         '<a href="./offline.html" download="study-flashcards-offline.html">オフライン版を保存（1ファイル）</a>'
+        '<a href="./offline_download_qr.png" target="_blank">オフライン版DL用QR</a>'
     )
     return (
         html_template

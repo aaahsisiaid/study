@@ -1,0 +1,5 @@
+# 元データ・バックアップ（ビルド済み index.html に統合済みのため除外）
+art_source.html
+kateika_only.html
+reference_art_extracted.html
+__pycache__/

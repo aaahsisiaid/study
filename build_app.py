@@ -75,13 +75,15 @@ kcards_js_with_subj = re.sub(r'(\{id:"[^"]+",)', r'\1subj:"home",', kcards_js)
 k_count = len(re.findall(r'\{id:"p\d+-\d+"', kcards_js_with_subj))
 assert k_count == 149, f"家庭科カード数が149ではありません: {k_count}"
 
-# 3. 体育・音楽・保健のJSONを読み込み
+# 3. 体育・音楽・保健・社会のJSONを読み込み
 with open(os.path.join(WORK_DIR, "data_pe.json"), encoding="utf-8") as f:
     pe_cards = json.load(f)
 with open(os.path.join(WORK_DIR, "data_music.json"), encoding="utf-8") as f:
     music_cards = json.load(f)
 with open(os.path.join(WORK_DIR, "data_health.json"), encoding="utf-8") as f:
     health_cards = json.load(f)
+with open(os.path.join(WORK_DIR, "data_social.json"), encoding="utf-8") as f:
+    social_cards = json.load(f)
 
 # 4. 音楽の画像28枚（楽器24種は鮮明な実物カラー写真、図1〜3と楽譜は切り抜き）をBase64データURI化
 PHOTO_DIR = os.path.join(WORK_DIR, "music_photos")
@@ -99,8 +101,8 @@ for c in music_cards:
     if "imgKey" in c:
         assert c["imgKey"] in music_imgs, f"画像が見つかりません: {c['imgKey']}"
 
-print(f"Art: {len(art_cards)}, Home: {k_count}, PE: {len(pe_cards)}, Music: {len(music_cards)} (imgs={len(music_imgs)}), Health: {len(health_cards)}")
-print(f"GRAND TOTAL: {len(art_cards) + k_count + len(pe_cards) + len(music_cards) + len(health_cards)}")
+print(f"Art: {len(art_cards)}, Home: {k_count + 2}, PE: {len(pe_cards)}, Music: {len(music_cards)} (imgs={len(music_imgs)}), Health: {len(health_cards)}, Social: {len(social_cards)}")
+print(f"GRAND TOTAL: {len(art_cards) + k_count + 2 + len(pe_cards) + len(music_cards) + len(health_cards) + len(social_cards)}")
 
 # 5. 単一HTMLテンプレートに結合
 html_template = r"""<!doctype html>
@@ -108,37 +110,37 @@ html_template = r"""<!doctype html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>5教科テスト対策フラッシュカード｜美術・家庭科・体育・音楽・保健（全553問）</title>
-<meta name="description" content="中学・高校の期末テスト対策に使える無料の暗記フラッシュカード。美術（名画・作品148問）・家庭科（消費者・クレジットカード・表示マーク・8つの権利と5つの責任など151問）・体育（水泳・器械運動・陸上・ハンドボール・卓球80問）・音楽（世界の民族楽器写真24種・帰れソレントへ65問）・保健（感染症・エイズ・医薬品109問）の全553問を収録。">
-<meta name="keywords" content="テスト対策,期末テスト,フラッシュカード,暗記カード,実技教科,美術,家庭科,体育,音楽,保健,消費者の8つの権利,消費者の5つの責任,クーリングオフ,世界の民族楽器,帰れソレントへ,感染症,エイズ,無料">
+<title>6教科テスト対策フラッシュカード｜美術・家庭科・体育・音楽・保健・社会（全677問）</title>
+<meta name="description" content="中学・高校の期末テスト対策に使える無料の暗記フラッシュカード。美術（148問）・家庭科（消費者・クレカ・マーク・8つの権利と5つの責任など151問）・体育（80問）・音楽（世界の民族楽器写真24種・帰れソレントへ65問）・保健（感染症・エイズ・医薬品109問）・社会（歴史：明治維新〜第一次世界大戦と民族独立の動き124問）の全677問を収録。">
+<meta name="keywords" content="テスト対策,期末テスト,フラッシュカード,暗記カード,中学歴史,社会,明治維新,自由民権運動,大日本帝国憲法,日清戦争,日露戦争,第一次世界大戦,美術,家庭科,消費者の8つの権利,消費者の5つの責任,体育,音楽,世界の民族楽器,保健,感染症,無料">
 <meta name="robots" content="index,follow">
 <link rel="canonical" href="https://aaahsisiaid.github.io/study/">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="ja_JP">
-<meta property="og:site_name" content="5教科テスト対策フラッシュカード">
-<meta property="og:title" content="5教科テスト対策フラッシュカード｜美術・家庭科・体育・音楽・保健（全553問）">
-<meta property="og:description" content="美術・家庭科（8つの権利と5つの責任・マーク15種）・体育・音楽（民族楽器24種写真）・保健の全553問をスマホやPCで暗記できる無料フラッシュカード。">
+<meta property="og:site_name" content="6教科テスト対策フラッシュカード">
+<meta property="og:title" content="6教科テスト対策フラッシュカード｜美術・家庭科・体育・音楽・保健・社会（全677問）">
+<meta property="og:description" content="美術・家庭科・体育・音楽・保健・社会（明治維新〜第一次世界大戦と民族独立の動き）の全677問をスマホやPCで暗記できる無料フラッシュカード。">
 <meta property="og:url" content="https://aaahsisiaid.github.io/study/">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="5教科テスト対策フラッシュカード（美術・家庭科・体育・音楽・保健）">
-<meta name="twitter:description" content="実技5教科の全553問を教科別・単元別に暗記できる無料フラッシュカード。">
+<meta name="twitter:title" content="6教科テスト対策フラッシュカード（美術・家庭科・体育・音楽・保健・社会）">
+<meta name="twitter:description" content="6教科の全677問を教科別・単元別に暗記できる無料フラッシュカード。">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "WebApplication",
-  "name": "5教科テスト対策フラッシュカード（美術・家庭科・体育・音楽・保健）",
+  "name": "6教科テスト対策フラッシュカード（美術・家庭科・体育・音楽・保健・社会）",
   "url": "https://aaahsisiaid.github.io/study/",
   "inLanguage": "ja",
   "applicationCategory": "EducationalApplication",
   "operatingSystem": "All",
   "isAccessibleForFree": true,
-  "description": "美術148問・家庭科151問（消費者の8つの権利・5つの責任・商品選択マーク15種含む）・体育80問・音楽65問（世界の民族楽器24種写真・帰れソレントへ）・保健109問の全553問を収録した期末テスト対策フラッシュカード。",
-  "about": ["美術", "家庭科", "消費者の8つの権利", "消費者の5つの責任", "体育", "音楽", "世界の民族楽器", "帰れソレントへ", "保健体育", "感染症"]
+  "description": "美術148問・家庭科151問・体育80問・音楽65問・保健109問・社会（歴史：明治維新〜第一次世界大戦と民族独立の動き）124問の全677問を収録した期末テスト対策フラッシュカード。",
+  "about": ["美術", "家庭科", "消費者の8つの権利", "消費者の5つの責任", "体育", "音楽", "世界の民族楽器", "帰れソレントへ", "保健体育", "感染症", "社会", "中学歴史", "明治維新", "第一次世界大戦"]
 }
 </script>
 <style>
-:root{--bg:#f6f3ee;--fg:#222;--sub:#666;--card:#fff;--line:#ddd6cb;--acc:#7b4fb0;--ok:#2e8b57;--ng:#c0392b;--mark-bg:#ffffff;--s-art:#7b4fb0;--s-home:#c06c2b;--s-pe:#2574a9;--s-music:#b83b6e;--s-health:#2e8b57}
-@media (prefers-color-scheme:dark){:root{--bg:#1b1a18;--fg:#eee;--sub:#aaa;--card:#262522;--line:#3a3833;--acc:#a988d6;--ok:#4cbb7f;--ng:#e5675a;--mark-bg:#f4f2ee;--s-art:#a988d6;--s-home:#e69b5c;--s-pe:#5faee3;--s-music:#e57ca8;--s-health:#5ac48a}}
+:root{--bg:#f6f3ee;--fg:#222;--sub:#666;--card:#fff;--line:#ddd6cb;--acc:#7b4fb0;--ok:#2e8b57;--ng:#c0392b;--mark-bg:#ffffff;--s-art:#7b4fb0;--s-home:#c06c2b;--s-pe:#2574a9;--s-music:#b83b6e;--s-health:#2e8b57;--s-social:#a67c00}
+@media (prefers-color-scheme:dark){:root{--bg:#1b1a18;--fg:#eee;--sub:#aaa;--card:#262522;--line:#3a3833;--acc:#a988d6;--ok:#4cbb7f;--ng:#e5675a;--mark-bg:#f4f2ee;--s-art:#a988d6;--s-home:#e69b5c;--s-pe:#5faee3;--s-music:#e57ca8;--s-health:#5ac48a;--s-social:#e0b044}}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--fg);font-family:"Hiragino Sans","Yu Gothic UI","Meiryo",sans-serif;line-height:1.6}
 .wrap{max-width:640px;margin:auto;padding:16px 16px 40px}
@@ -152,6 +154,7 @@ h1{font-size:1.25rem;margin:0 0 10px}
 .subj-bar button[data-s="pe"].on{background:var(--s-pe);border-color:var(--s-pe);color:#fff}
 .subj-bar button[data-s="music"].on{background:var(--s-music);border-color:var(--s-music);color:#fff}
 .subj-bar button[data-s="health"].on{background:var(--s-health);border-color:var(--s-health);color:#fff}
+.subj-bar button[data-s="social"].on{background:var(--s-social);border-color:var(--s-social);color:#fff}
 .cnt{font-size:.75rem;opacity:.75;margin-left:3px;font-weight:500}
 .stat{color:var(--sub);font-size:.84rem;margin:8px 0;display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px}
 .scene{perspective:1200px;cursor:pointer;user-select:none}
@@ -166,7 +169,7 @@ h1{font-size:1.25rem;margin:0 0 10px}
 .hint{position:absolute;bottom:8px;left:0;right:0;text-align:center;font-size:.75rem;color:var(--sub);pointer-events:none}
 .topic{position:absolute;top:10px;left:14px;right:14px;display:flex;justify-content:space-between;align-items:center;font-size:.75rem;color:var(--sub);pointer-events:none;gap:8px}
 .sbadge{display:inline-block;padding:1px 8px;border-radius:999px;font-size:.72rem;font-weight:700;color:#fff;margin-right:5px}
-.s-art{background:var(--s-art)}.s-home{background:var(--s-home)}.s-pe{background:var(--s-pe)}.s-music{background:var(--s-music)}.s-health{background:var(--s-health)}
+.s-art{background:var(--s-art)}.s-home{background:var(--s-home)}.s-pe{background:var(--s-pe)}.s-music{background:var(--s-music)}.s-health{background:var(--s-health)}.s-social{background:var(--s-social)}
 .q{font-size:1.1rem;font-weight:700;max-width:100%;word-break:break-word}
 .q-sub{font-weight:400;font-size:.96rem;margin:10px 0 6px;line-height:1.65}
 .blank{display:inline-block;padding:0 6px;margin:0 2px;border-radius:5px;border:1.5px solid var(--acc);color:var(--acc);font-weight:800}
@@ -230,7 +233,7 @@ label.chk{display:inline-flex;align-items:center;gap:4px;font-size:.82rem;margin
 <div class="nav"><button id="prev">← 前</button><button class="ng" id="no">まだ</button><button class="ok" id="yes">覚えた</button><button id="nxt">次 →</button></div>
 <p style="color:var(--sub);font-size:.8rem;margin-top:10px">カードをタップでめくる。キーボードは ←→ で移動、スペースでめくる、↑で覚えた、↓でまだ。</p>
 <details class="seo-info">
-  <summary>収録教科・テスト対策範囲一覧（全553問）</summary>
+  <summary>収録教科・テスト対策範囲一覧（全677問）</summary>
   <h2>美術（148問）</h2>
   <p>日本の作品・西洋の作品・アジアの作品の絵画フラッシュカード（題名・作者・制作年・主義・地域）および教科書穴埋め問題。</p>
   <h2>家庭科（151問）</h2>
@@ -241,6 +244,8 @@ label.chk{display:inline-flex;align-items:center;gap:4px;font-size:.82rem;margin
   <p>世界の諸民族の音楽（バグパイプ・バンジョー・グーチン・スティールパン・チャランゴ・カヤグム・ディジェリドゥ・シタール・トーキングドラム・バラフォン・ウード・バラライカ・チャンゴ・ケーナ・サンポーニャ・コラ・ドゥドゥク・ズルナ・ツィター・ウクレレ・ピーパー・タンソ・サウンガウ・タブラーの24種写真付き）、タンソ・ウード・タブラーの解説問題、カンツォーネ『帰れソレントへ』（楽譜・同主調・速度記号）。</p>
   <h2>保健（109問）</h2>
   <p>感染症とその予防（潜伏期間・症状・新興感染症）、感染症対策と食中毒予防の三原則、性感染症・エイズ（HIV）と予防、ヘルスプロモーション・保健所と保健センター・ノーマライゼーション・国民総幸福量（GNH）・医療機関の利用と医薬品の正しい使用。</p>
+  <h2>社会・歴史（124問）</h2>
+  <p>明治維新と近代国家の出発（五箇条の御誓文・戊辰戦争・廃藩置県・三大改革・文明開化）、領土の確定と近隣諸国との外交（岩倉使節団・北海道開拓・琉球処分・樺太千島交換条約・日清／日朝修好条規）、自由民権運動と大日本帝国憲法、欧米の帝国主義と条約改正・日清戦争・日露戦争・韓国併合・辛亥革命、日本の産業革命と明治の文化、第一次世界大戦とロシア革命・国際連盟・ワシントン会議・アジアの民族独立運動（三・一独立運動・五・四運動・ガンディー）。</p>
 </details>
 </div>
 <script>
@@ -249,9 +254,10 @@ const SUBJ_META = {
   all:    { label: "全教科", order: 0, filters: [["all","ぜんぶ"],["visual","絵・写真・マーク"],["cloze","穴埋め"],["todo","まだのカードだけ"]] },
   art:    { label: "美術",   order: 5, filters: [["all","ぜんぶ"],["jp","日本の作品"],["west","西洋の作品"],["asia","アジアの作品"],["cloze","穴埋め"],["todo","まだのカードだけ"]] },
   home:   { label: "家庭科", order: 2, filters: [["all","ぜんぶ"],["consumer","消費者・支払い"],["credit","クレカ・相談機関"],["trouble","トラブル・法律"],["select","選択・マーク"],["mark","マークだけ"],["rights","消費者基本法・権利と責任"],["rights85","8つの権利・5つの責任"],["todo","まだのカードだけ"]] },
-  pe:     { label: "体育",   order: 3, filters: [["all","ぜんぶ"],["swim","水泳"],["gym","器械運動"],["track","陸上競技"],["handball","ハンドボール"],["pingpong","卓球"],["todo","まだのカードだけ"]] },
+  pe:     { label: "体育",   order: 4, filters: [["all","ぜんぶ"],["swim","水泳"],["gym","器械運動"],["track","陸上競技"],["handball","ハンドボール"],["pingpong","卓球"],["todo","まだのカードだけ"]] },
   music:  { label: "音楽",   order: 1, filters: [["all","ぜんぶ"],["inst","世界の楽器（写真）"],["world","タンソ・ウード・タブラー"],["sorrento","帰れソレントへ"],["todo","まだのカードだけ"]] },
-  health: { label: "保健",   order: 4, filters: [["all","ぜんぶ"],["inf1","感染症と予防"],["inf2","対策・食中毒・性感染症"],["aids","エイズ・予防"],["soc","社会の取組・医薬品"],["todo","まだのカードだけ"]] }
+  health: { label: "保健",   order: 6, filters: [["all","ぜんぶ"],["inf1","感染症と予防"],["inf2","対策・食中毒・性感染症"],["aids","エイズ・予防"],["soc","社会の取組・医薬品"],["todo","まだのカードだけ"]] },
+  social: { label: "社会",   order: 3, filters: [["all","ぜんぶ"],["meiji1","明治維新"],["meiji2","領土と外交"],["minken","自由民権・憲法"],["wars","日清・日露戦争"],["culture","産業革命・文化"],["ww1","第一次大戦・独立"],["todo","まだのカードだけ"]] }
 };
 
 __MARKS_AND_DIAGRAM__
@@ -275,9 +281,10 @@ __HOME_CARDS__,
 const PE_CARDS = __PE_CARDS__;
 const MUSIC_CARDS = __MUSIC_CARDS__;
 const HEALTH_CARDS = __HEALTH_CARDS__;
+const SOCIAL_CARDS = __SOCIAL_CARDS__;
 
-// 全教科のカードを結合（初期順：美術 → 家庭科 → 体育 → 音楽 → 保健）
-const ALL = [...ART_CARDS, ...HOME_CARDS, ...PE_CARDS, ...MUSIC_CARDS, ...HEALTH_CARDS];
+// 全教科のカードを結合（初期順：美術 → 家庭科 → 体育 → 音楽 → 保健 → 社会）
+const ALL = [...ART_CARDS, ...HOME_CARDS, ...PE_CARDS, ...MUSIC_CARDS, ...HEALTH_CARDS, ...SOCIAL_CARDS];
 ALL.forEach((c, idx) => { c._ord = idx; });
 
 // 既存の学習記録（美術・家庭科）を引き継いで統合保存
@@ -320,7 +327,7 @@ const shuffle = a => {
 
 // 教科ボタン行の生成
 function buildSubjBar() {
-  const keys = ["all", "art", "home", "pe", "music", "health"];
+  const keys = ["all", "art", "home", "pe", "music", "health", "social"];
   $("#subj").innerHTML = keys.map(k => {
     const cnt = k === "all" ? ALL.length : ALL.filter(c => c.subj === k).length;
     return `<button data-s="${k}" class="${k === subj ? "on" : ""}">${SUBJ_META[k].label}<span class="cnt">${cnt}</span></button>`;
@@ -565,6 +572,7 @@ out_html = (
     .replace("__PE_CARDS__", json.dumps(pe_cards, ensure_ascii=False))
     .replace("__MUSIC_CARDS__", json.dumps(music_cards, ensure_ascii=False))
     .replace("__HEALTH_CARDS__", json.dumps(health_cards, ensure_ascii=False))
+    .replace("__SOCIAL_CARDS__", json.dumps(social_cards, ensure_ascii=False))
 )
 
 out_path = os.path.join(WORK_DIR, "index.html")

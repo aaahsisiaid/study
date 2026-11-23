@@ -83,12 +83,14 @@ with open(os.path.join(WORK_DIR, "data_music.json"), encoding="utf-8") as f:
 with open(os.path.join(WORK_DIR, "data_health.json"), encoding="utf-8") as f:
     health_cards = json.load(f)
 
-# 4. 音楽の切り抜き画像28枚をBase64データURI化
+# 4. 音楽の画像28枚（楽器24種は鮮明な実物カラー写真、図1〜3と楽譜は切り抜き）をBase64データURI化
+PHOTO_DIR = os.path.join(WORK_DIR, "music_photos")
 music_imgs = {}
 for fn in sorted(os.listdir(CROP_DIR)):
     if fn.endswith(".jpg") and not fn.startswith("_"):
         key = os.path.splitext(fn)[0]
-        with open(os.path.join(CROP_DIR, fn), "rb") as f:
+        src_path = os.path.join(PHOTO_DIR, fn) if os.path.exists(os.path.join(PHOTO_DIR, fn)) else os.path.join(CROP_DIR, fn)
+        with open(src_path, "rb") as f:
             b64 = base64.b64encode(f.read()).decode("ascii")
         music_imgs[key] = "data:image/jpeg;base64," + b64
 

@@ -23,7 +23,8 @@ music_imgs = {}
 for fn in sorted(os.listdir(CROP_DIR)):
     if fn.endswith(".jpg") and not fn.startswith("_"):
         key = os.path.splitext(fn)[0]
-        sp = os.path.join(PHOTO_DIR, fn) if os.path.exists(os.path.join(PHOTO_DIR, fn)) else os.path.join(CROP_DIR, fn)
+        # 元プリントから切り抜いた白黒写真をそのまま使用
+        sp = os.path.join(CROP_DIR, fn)
         with open(sp, "rb") as f:
             music_imgs[key] = "data:image/jpeg;base64," + base64.b64encode(f.read()).decode("ascii")
 
@@ -265,7 +266,7 @@ h1 {{ font-size: 14pt; margin: 0 0 8pt; border-bottom: 2px solid #000; padding-b
 h1 small {{ font-size: 9pt; font-weight: 400; }}
 h2 {{ font-size: 11pt; margin: 10pt 0 6pt; padding: 2pt 6pt; border-left: 4px solid #000; background: #efefef; }}
 h3 {{ font-size: 10pt; margin: 0 0 4pt; }}
-img {{ filter: grayscale(100%) contrast(1.1); }}
+img {{ filter: grayscale(100%) contrast(1.22) brightness(1.06); }}
 .igrid {{ display: grid; grid-template-columns: repeat(4, 1fr); gap: 5pt; }}
 .icard {{ border: 1px solid #000; padding: 3.5pt; display: flex; flex-direction: column; break-inside: avoid; }}
 .ihd {{ font-size: 7.8pt; font-weight: 700; margin-bottom: 2pt; }}

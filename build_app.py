@@ -730,6 +730,14 @@ __QR_MODAL_UI_JS__
 
 // PWAオフラインキャッシュ登録（通常版・HTTPS環境のみ）
 if (!IS_OFFLINE_BUILD && "serviceWorker" in navigator && location.protocol.startsWith("http")) {
+  const hadCtrl = !!navigator.serviceWorker.controller;
+  let swReloaded = false;
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    if (hadCtrl && !swReloaded) {
+      swReloaded = true;
+      location.reload();
+    }
+  });
   navigator.serviceWorker.register("./sw.js").then(reg => {
     const showReady = () => {
       const el = $("#pwa-status");
@@ -740,6 +748,7 @@ if (!IS_OFFLINE_BUILD && "serviceWorker" in navigator && location.protocol.start
       const nw = reg.installing;
       if (nw) nw.addEventListener("statechange", () => { if (nw.state === "activated") showReady(); });
     });
+    reg.update().catch(() => {});
     navigator.serviceWorker.ready.then(showReady);
   }).catch(() => {});
   if (navigator.storage && navigator.storage.persist) {

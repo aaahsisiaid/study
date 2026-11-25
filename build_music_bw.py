@@ -266,12 +266,12 @@ h1 small {{ font-size: 9pt; font-weight: 400; }}
 h2 {{ font-size: 11pt; margin: 10pt 0 6pt; padding: 2pt 6pt; border-left: 4px solid #000; background: #efefef; }}
 h3 {{ font-size: 10pt; margin: 0 0 4pt; }}
 img {{ filter: grayscale(100%) contrast(1.1); }}
-.igrid {{ display: grid; grid-template-columns: repeat(4, 1fr); gap: 6pt; }}
-.icard {{ border: 1px solid #000; padding: 4pt; display: flex; flex-direction: column; break-inside: avoid; }}
-.ihd {{ font-size: 8pt; font-weight: 700; margin-bottom: 3pt; }}
-.iimg {{ height: 74pt; display: flex; align-items: center; justify-content: center; overflow: hidden; }}
+.igrid {{ display: grid; grid-template-columns: repeat(4, 1fr); gap: 5pt; }}
+.icard {{ border: 1px solid #000; padding: 3.5pt; display: flex; flex-direction: column; break-inside: avoid; }}
+.ihd {{ font-size: 7.8pt; font-weight: 700; margin-bottom: 2pt; }}
+.iimg {{ height: 56pt; display: flex; align-items: center; justify-content: center; overflow: hidden; }}
 .iimg img {{ max-width: 100%; max-height: 100%; object-fit: contain; }}
-.iline {{ border-bottom: 1px solid #000; height: 15pt; margin-top: 3pt; }}
+.iline {{ border-bottom: 1px solid #000; height: 13pt; margin-top: 2pt; }}
 .pb {{ page-break-before: always; break-before: page; }}
 .wblock {{ display: flex; gap: 10pt; border: 1px solid #000; padding: 7pt; margin-bottom: 8pt; align-items: center; break-inside: avoid; }}
 .wleft {{ flex: 1; }}

@@ -1,5 +1,5 @@
 // 6教科テスト対策フラッシュカード 完全オフライン用 Service Worker
-const CACHE_NAME = "study-fc-pwa-v1";
+const CACHE_NAME = "study-fc-pwa-v2";
 const PRECACHE_URLS = [
   "./",
   "./index.html",

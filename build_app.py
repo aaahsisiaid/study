@@ -575,8 +575,7 @@ function render() {
   } else if (c.type === "photo") {
     const src = MUSIC_IMGS[c.imgKey];
     if (side === "img") {
-      f += `<img src="${src}" alt="" style="max-height:68%;border:1px solid var(--line);background:#fff;padding:4px">` +
-           `<div class="region-hint">地域：${esc(c.r)}</div>`;
+      f += `<img src="${src}" alt="" style="max-height:78%;border:1px solid var(--line);background:#fff;padding:4px">`;
       if (show.t) b += `<p class="t">${esc(c.a)}</p>`;
       if (show.r || show.m) b += `<div>${show.r ? `<span class="tag r">${esc(c.r)}</span>` : ""}${show.m ? `<span class="tag">${esc(c.unit)}</span>` : ""}</div>`;
       if (show.y) b += `<p class="y">${esc(c.note)}</p>`;

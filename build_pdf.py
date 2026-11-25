@@ -152,7 +152,7 @@ def render_pdf_html():
                 )
             elif ctype == "photo":
                 src = music_imgs[c["imgKey"]]
-                q_body = f'<img class="hero" src="{src}" alt=""><div class="region">地域：{esc(c.get("r", ""))}</div>'
+                q_body = f'<img class="hero" src="{src}" alt="">'
                 a_body = (
                     f'<p class="t">{esc(c["a"])}</p>'
                     f'<div><span class="tag r">{esc(c.get("r", ""))}</span><span class="tag">{esc(c.get("unit", ""))}</span></div>'

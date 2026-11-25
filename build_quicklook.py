@@ -112,10 +112,7 @@ def render_ql_card(c, idx, total, marks_map, music_imgs, art_img_key_map):
     elif ctype == "photo":
         ik = c["imgKey"]
         src = music_imgs[ik]
-        front = (
-            f'<div class="ql-imgwrap"><img data-imgkey="{ik}" src="{src}" alt=""></div>'
-            f'<div class="region-hint">地域：{esc(c.get("r", ""))}</div>'
-        )
+        front = f'<div class="ql-imgwrap"><img data-imgkey="{ik}" src="{src}" alt=""></div>'
         back = (
             f'<p class="t">{esc(c["a"])}</p>'
             f'<div><span class="tag r">{esc(c.get("r", ""))}</span><span class="tag">{esc(c.get("unit", ""))}</span></div>'
